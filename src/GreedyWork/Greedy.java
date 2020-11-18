@@ -12,7 +12,7 @@ public class Greedy {
     List<Edge> edge;
     List<Integer> explored;
     List<Edge> E;
-    HashSet<Integer> Unexplored;
+    LinkedList<Integer> Unexplored;
     HashMap<Integer, GreedyWork.UnionFind.UFNode> nodeAndPnt = new HashMap<>();
     public Greedy(int n){
         this.n = n;
@@ -21,7 +21,7 @@ public class Greedy {
         isExplored = new boolean[n+1];
         explored = new LinkedList<>();
         E = new LinkedList<>();
-        Unexplored = new HashSet<>();
+        Unexplored = new LinkedList<>();
     }
     public void readFile(String filename) throws IOException {
         BufferedReader file = new BufferedReader(new FileReader(filename));
@@ -37,12 +37,12 @@ public class Greedy {
             other[col][row] = other[row][col] = weight;
             edge.add(new Edge(row, col, weight));
         }
-    }
-    public int Prim(){
-        int sum = 0;
         for(int i = 2; i < n+1; i++){
             Unexplored.add(i);
         }
+    }
+    public int Prim(){
+        int sum = 0;
         Comparator<Edge> comparator = new Comparator<Edge>() {
             @Override
             public int compare(Edge o1, Edge o2) {
@@ -61,11 +61,11 @@ public class Greedy {
             E.add(u);
             if (!explored.contains(u.startNode)) {
                 explored.add(u.startNode);
-                Unexplored.remove(u.startNode);
+                Unexplored.remove(Integer.valueOf(u.startNode));
             }
             if (!explored.contains(u.endNode)) {
                 explored.add(u.endNode);
-                Unexplored.remove(u.endNode);
+                Unexplored.remove(Integer.valueOf(u.endNode));
             }
             pq = new PriorityQueue<>(comparator);
         }
