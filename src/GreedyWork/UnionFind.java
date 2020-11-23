@@ -9,11 +9,9 @@ import java.util.Set;
 public class UnionFind {
 
     public static class UFNode {
-        //父节点
         UFNode parent;
     }
 
-    //查询
     public static UFNode find(UFNode x) {
         UFNode p = x;
         //用于先把不同深度的节点存起来，最后统一指向根结点，加快查询效率
