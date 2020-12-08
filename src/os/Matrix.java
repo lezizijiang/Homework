@@ -1,25 +1,27 @@
 package os;
 
 import java.io.*;
-import java.lang.reflect.GenericDeclaration;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
+/**
+ * @author rrass
+ */
 public class Matrix {
     double[][] a, b;
     int length,n;
     double[][] result;
     CountDownLatch count1;
-    Matrix(String fileName1, String fileName2, int length, int n) throws IOException{
+    Matrix(String fileName1, String fileName2, int length) throws IOException{
         a = getData(fileName1, length);
         b = getData(fileName2, length);
         this.length = length;
-        this.n = n;
         result = new double[length][length];
         count1 = new CountDownLatch(n);
     }
+
+    public void setN(int n) {
+        this.n = n;
+    }
+
     public double[][] singleThread(){
         double[][] res = new double[length][length];
         for(int i = 0; i < length;i++){
@@ -46,42 +48,53 @@ public class Matrix {
         return res;
     }
     class MyThread extends Thread{
+        int start;
+        MyThread(int m){
+            start = m;
+        }
         @Override
         public void run() {
             int len = Matrix.this.length;
             int width = len / Matrix.this.n;
-            String[] name = Thread.currentThread().getName().split("-");
-            int id = Integer.parseInt(name[1]), start = id * width, end = start + width;
-            int count = 0;
-            System.out.println(id);
+            int id = this.start, start = id * width, end = start + width;
             for(int i = start; i< end;i++){
-                for(int j = start; j < end; j++){
+                for(int j = 0; j < len; j++){
                     for(int k = 0; k < len; k++){
                         Matrix.this.result[i][j] = Matrix.this.a[i][k] * Matrix.this.b[k][j];
-                        count ++;
                     }
                 }
             }
             Matrix.this.count1.countDown();
-            System.out.println(count);
         }
     }
-    public double[][] multiThread(int n){
+    public double[][] multiThread(){
         for(int i = 0 ; i  < n; i++){
-            MyThread thread = new MyThread();
+            MyThread thread = new MyThread(i);
             thread.start();
         }
         return result;
     }
     public static void main(String[] args) throws IOException, InterruptedException {
-        Matrix matrix = new Matrix("mx/M512A.txt", "mx/M512B.txt", 512, 4);
+        Matrix matrix64, matrix128, matrix512, matrix1024;
+//        matrix64 = new Matrix("mx/M64A.txt", "mx/M64B.txt", 64);
+//        matrix128 = new Matrix("mx/M128A.txt", "mx/M128B.txt", 128);
+//        matrix512 = new Matrix("mx/M512A.txt", "mx/M512B.txt", 512);
+        matrix1024 = new Matrix("mx/M1024A.txt", "mx/M1024B.txt", 1024);
+//        long startTime = System.currentTimeMillis();
+//        matrix64.singleThread();
+//        long endTime = System.currentTimeMillis();
+//        System.out.println("64矩阵单线程用时" + (endTime - startTime));
+//        startTime = System.currentTimeMillis();
+//        matrix128.singleThread();
+//        endTime = System.currentTimeMillis();
+//        System.out.println("128矩阵单线程用时" + (endTime - startTime));
+//        startTime = System.currentTimeMillis();
+//        matrix512.singleThread();
+//        endTime = System.currentTimeMillis();
+//        System.out.println("512矩阵单线程用时" + (endTime - startTime));
         long startTime = System.currentTimeMillis();
-        matrix.singleThread();
-        long endTime1 = System.currentTimeMillis();
-        System.out.println(endTime1 - startTime);
-        matrix.multiThread(4);
-        matrix.count1.await();
-        long endTime2 = System.currentTimeMillis();
-        System.out.println(endTime2 - endTime1);
+        matrix1024.singleThread();
+        long endTime = System.currentTimeMillis();
+        System.out.println("1024矩阵单线程用时" + (endTime - startTime));
     }
 }
